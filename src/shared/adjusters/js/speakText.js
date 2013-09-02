@@ -163,10 +163,7 @@
                 "model.screenReaderSwitch": "default"
             },
             "speechRate": {
-                "model.value": "default", /* WARNING
-                A temporary solution is to store "default" in model.VALUE
-                With the separation into smaller components this actually
-                won't be an issue */
+                "model.speechRate": "default",
                 "controlValues.speechRate.min": "minimum",
                 "controlValues.speechRate.step": "divisibleBy"
             },
@@ -256,7 +253,13 @@
                     func: "gpii.uiOptions.textfieldStepper",
                     options: {
                         range: "{that}.options.controlValues.speechRate",
-                        path: "value"
+                        model: {
+                            value: "${speechRate}"
+                        },
+                        rules: {
+                            "speechRate": "value"
+                        },
+                        sourceApplier: "{that}.applier"
                     }
                 }
             },

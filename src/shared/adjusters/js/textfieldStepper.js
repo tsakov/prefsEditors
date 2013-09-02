@@ -8,27 +8,7 @@ var fluid_1_5 = fluid_1_5 || {};
      *******************************************/
 
     fluid.defaults("gpii.textfieldStepper", {
-        gradeNames: ["fluid.viewComponent", "autoInit"],
-        components: {
-            textfield: {
-                type: "fluid.textfieldSlider.textfield",
-                container: "{textfieldStepper}.dom.textfield",
-                options: {
-                    model: "{textfieldStepper}.model",
-                    range: "{textfieldStepper}.options.range",
-                    applier: "{textfieldStepper}.applier"
-                }
-            },
-            buttons: {
-                type: "gpii.textfieldStepper.buttons",
-                container: "{textfieldStepper}.dom.buttons",
-                options: {
-                    model: "{textfieldStepper}.model",
-                    range: "{textfieldStepper}.options.range",
-                    applier: "{textfieldStepper}.applier"
-                }
-            }
-        },
+        gradeNames: ["fluid.textfieldSlider.textfield", "gpii.textfieldStepper.buttons", "autoInit"],
         selectors: {
             textfield: ".gpii-textfieldStepper-field",
         },
@@ -58,7 +38,6 @@ var fluid_1_5 = fluid_1_5 || {};
     });
 
     gpii.textfieldStepper.finalInit = function (that) {
-
         that.applier.modelChanged.addListener("value", function (newModel) {
             that.events.modelChanged.fire(newModel.value);
         });
@@ -69,7 +48,7 @@ var fluid_1_5 = fluid_1_5 || {};
     };
 
     gpii.textfieldStepper.refreshView = function (that) {
-        that.textfield.container.val(that.model.value);
+        that.locate("textfield").val(that.model.value);
         that.events.afterRender.fire(that);
     };
 
@@ -86,40 +65,43 @@ var fluid_1_5 = fluid_1_5 || {};
             onCreate: {
                 listener: "gpii.textfieldStepper.buttons.init",
                 args: "{that}"
+            },
+            "onCreate.inc": {
+                "this": "{that}.dom.inc",
+                "method": "click",
+                "args": ["{that}.increment"]
+            },
+            "onCreate.dec": {
+                "this": "{that}.dom.dec",
+                "method": "click",
+                "args": ["{that}.decrement"]
             }
         },
         range: {} // should be used to specify the min, max range and step e.g. {min: 0, max: 100, step: 5}
     });
 
     gpii.textfieldStepper.buttons.init = function (that) {
-        that.locate("inc").click(function () {
+        that.increment = function () {
             var newValue = that.model.value + that.options.range.step;
             that.applier.requestChange("value", newValue);
-        });
+        };
 
-        that.locate("dec").click(function () {
+        that.decrement = function () {
             var newValue = that.model.value - that.options.range.step;
             that.applier.requestChange("value", newValue);
-        });
+        };
 
-        that.applier.modelChanged.addListener("value", function (newModel) {
-            if (typeof newModel.value !== "number") {
-                that.applier.requestChange("value", parseInt(newModel.value));
+        that.applier.guards.addListener({path: "value", transactional: true}, function (model, changeRequest) {
+            var val = changeRequest.value;
+            if (typeof val === "string") {
+                changeRequest.value = parseInt(val, 10);
             }
         });
     };
 
     fluid.defaults("gpii.uiOptions.textfieldStepper", {
-        gradeNames: ["gpii.textfieldStepper", "autoInit"],
-        model: "{fluid.uiOptions.panels}.model",
-        range: "{fluid.uiOptions.panels}.options.range",
-        listeners: {
-            modelChanged: {
-                listener: "{fluid.uiOptions.panels}.applier.requestChange",
-                args: ["{that}.options.path", "{arguments}.0"]
-            }
-        },
-        path: "value"
+        gradeNames: ["gpii.textfieldStepper", "fluid.uiOptions.modelRelay", "autoInit"],
+        range: "{fluid.uiOptions.panels}.options.range"
     });
 
 })(jQuery, fluid_1_5);
