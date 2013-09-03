@@ -332,7 +332,6 @@
         that.applier.modelChanged.addListener("screenReaderTTSEnabled", function () {
             if (that.model.screenReaderTTSEnabled) {
                 $(".more-options").text("+ more");
-                // that.locate("moreOptions").text(that.options.strings.moreText);
                 $("#speech-rate").slideDown();
                 $(".more-options").slideDown();
 
@@ -380,10 +379,7 @@
     // };
 
     function moreOrLessOptions(currentValue) {
-        if (currentValue == "+ more") {
-            return "- less";
-        }
-        return "+ more";
+        return currentValue == "+ more" ? "- less" : "+ more"
     };
 
     speakText.panel.punctuationVerbosityStyle = function (labels, values, classes) {
@@ -397,3 +393,7 @@
     };
 
 })(fluid);
+
+
+
+
